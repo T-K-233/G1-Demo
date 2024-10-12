@@ -1,7 +1,8 @@
 
 import gymnasium as gym
 
-from . import agents, flat_env_cfg, rough_env_cfg
+from .env_cfg import G1EnvCfg
+from .agents.rsl_rl_ppo_cfg import G1PPORunnerCfg
 
 ##
 # Register Gym environments.
@@ -9,11 +10,11 @@ from . import agents, flat_env_cfg, rough_env_cfg
 
 
 gym.register(
-    id="Isaac-Velocity-G1-v0",
+    id="Velocity-G1-v0",
     entry_point="omni.isaac.lab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": flat_env_cfg.G1FlatEnvCfg,
-        "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:G1FlatPPORunnerCfg",
+        "env_cfg_entry_point": G1EnvCfg,
+        "rsl_rl_cfg_entry_point": G1PPORunnerCfg,
     },
 )
