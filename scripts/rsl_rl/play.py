@@ -16,7 +16,7 @@ parser.add_argument("--video_length", type=int, default=200, help="Length of the
 parser.add_argument(
     "--disable_fabric", action="store_true", default=False, help="Disable fabric and use USD I/O operations."
 )
-parser.add_argument("--num_envs", type=int, default=None, help="Number of environments to simulate.")
+parser.add_argument("--num_envs", type=int, default=1, help="Number of environments to simulate.")
 parser.add_argument("--task", type=str, default=None, help="Name of the task.")
 # append RSL-RL cli arguments
 cli_args.add_rsl_rl_args(parser)
@@ -36,6 +36,8 @@ simulation_app = app_launcher.app
 import gymnasium as gym
 import os
 import torch
+import numpy as np
+import cv2
 
 from rsl_rl.runners import OnPolicyRunner
 
@@ -109,6 +111,12 @@ def main():
     # reset environment
     obs, _ = env.get_observations()
     timestep = 0
+
+    cv2.namedWindow("Depth", cv2.WINDOW_NORMAL)
+    cv2.namedWindow("RGB", cv2.WINDOW_NORMAL)
+
+    camera = env.unwrapped.scene.sensors["camera"]
+
     # simulate environment
     while simulation_app.is_running():
         # run everything in inference mode
@@ -117,12 +125,35 @@ def main():
             actions = policy(obs)
             # env stepping
             obs, _, _, _ = env.step(actions)
+
+            obs[:, 9:12] = 0.0
         if args_cli.video:
             timestep += 1
             # Exit the play loop after recording one video
             if timestep == args_cli.video_length:
                 break
+        
+        
+        rgb_img = camera.data.output["rgb"]
+        depth_img = camera.data.output["depth"]
 
+
+        # depth_img = torch.clamp(depth_img, min=0.1, max=50.0)
+
+        rgb_img = rgb_img[0].cpu().numpy().astype(np.uint8)
+        depth_img = depth_img[0].cpu().numpy()
+        depth_img = (depth_img - depth_img.min()) / (depth_img.max() - depth_img.min())
+        depth_img = (depth_img * 255).astype(np.uint8)
+
+        # post process image
+        rgb_img = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2BGR)
+        depth_img = cv2.cvtColor(depth_img, cv2.COLOR_GRAY2BGR)
+
+
+        cv2.imshow("RGB", rgb_img)
+        cv2.imshow("Depth", depth_img)
+        cv2.waitKey(1)
+        
     # close the simulator
     env.close()
 

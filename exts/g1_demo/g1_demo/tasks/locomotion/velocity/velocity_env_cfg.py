@@ -18,6 +18,7 @@ from omni.isaac.lab.sensors import ContactSensorCfg, RayCasterCfg, patterns
 from omni.isaac.lab.terrains import TerrainImporterCfg
 from omni.isaac.lab.utils import configclass
 from omni.isaac.lab.utils.noise import AdditiveUniformNoiseCfg as Unoise
+from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
 
 import g1_demo.tasks.locomotion.velocity.mdp as mdp
 
@@ -76,6 +77,15 @@ class MySceneCfg(InteractiveSceneCfg):
         prim_path="/World/skyLight",
         spawn=sim_utils.DomeLightCfg(color=(0.13, 0.13, 0.13), intensity=1000.0),
     )
+
+    room: AssetBaseCfg = AssetBaseCfg(
+        prim_path="/World/room",
+        # spawn=sim_utils.UsdFileCfg(usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Mounts/SeattleLabTable/table_instanceable.usd"),
+        spawn=sim_utils.UsdFileCfg(
+            usd_path="omniverse://localhost/NVIDIA/Assets/Isaac/4.2/Isaac/Environments/Digital_Twin_Warehouse/small_warehouse_digital_twin.usd"
+        ),
+    )
+
 
 
 ##
